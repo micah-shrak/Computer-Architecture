@@ -3,9 +3,8 @@
 """Main."""
 
 import sys
-from cpu import *
+from cpu import CPU
 
 cpu = CPU()
-
 cpu.load()
 cpu.run()

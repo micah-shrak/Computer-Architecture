@@ -8,31 +8,20 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        # 8 registers
-        self.reg = [0] * 8
+        # Add list properties to the `CPU` class to hold 256 bytes of memory and general-purpose registers.
 
-        # 256 bytes of memory
-        self.ram = [0] * 256
+        # Add properties for internal registers
 
-        # pass
+        self.register = [0] * 8
+        self.ram = [0] * 0xFF * 256
 
-        # Internal Registers
-        # Program counter, current index, pointer to currently executing instruction
-        self.pc = 0
-        self.fl = None  # FLAG
+        self.PC = self.register[0]
 
-        # op_codes
-        self.op_codes = {
-            'HLT': 0b00000001,
-            'LDI': 0b10000010,
-            'PRN': 0b01000111
-        }
+    def ram_read(self, address):
+        return self.ram[address]
 
-    def ram_read(self, MAR):
-        return self.ram[MAR]
-
-    def raw_write(self, MDR, MAR):
-        self.ram[MAR] = MDR
+    def ram_write(self, value, address):
+        self.ram[address] = value
 
     def load(self):
         """Load a program into memory."""
@@ -64,6 +53,15 @@ class CPU:
         else:
             raise Exception("Unsupported ALU operation")
 
+    def hlt(self, oper_a, oper_b):
+        return (0, False)
+
+    def ldi(self, oper_a, oper_b):
+        self.register[oper_a] = oper_b
+        return(3, True)
+
+    # def prn():
+
     def trace(self):
         """
         Handy function to print out the CPU state. You might want to call this
@@ -86,29 +84,4 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        halted = False
-        operand_a = self.ram_read(self.pc + 1)
-        operand_b = self.ram_read(self.pc + 2)
-
-        while not halted:
-
-            # Memory address from pc stored in IR variable
-            instruction = self.ram[self.pc]
-
-            if instruction == 0b10000010:
-
-                self.reg[operand_a] = operand_b
-                self.pc += 3
-
-            elif instruction == 0b01000111:
-
-                print(self.reg[operand_a])
-                self.pc += 2
-
-            elif instruction == 0b00000001:
-
-                halted = True
-
-            else:
-                print(f"Unknown instruction at index {instruction}")
-                sys.exit(1)
+        IR = self.ram[self.PC]
