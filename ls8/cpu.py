@@ -22,12 +22,14 @@ class CPU:
         self.fl = None  # FLAG
         self.sp = 0
 
-        # op_codes
+        # op_codes - change to branch table per step 9
         self.op_codes = {
             0b00000001: 'HLT',
             0b10000010: 'LDI',
             0b01000111: 'PRN',
-            0b10100010: 'MUL'}
+            0b10100010: 'MUL',
+            0b01000101: 'PUSH',  # Decrement self.sp
+            0b01000110: 'POP'}  # Increment self.sp
 
     def ram_read(self, MAR):
         return self.ram[MAR]
@@ -135,6 +137,20 @@ class CPU:
 
                 self.alu(op, reg_a, reg_b)
                 self.pc += 3
+
+            elif op == 'PUSH':
+                self.reg[7] = (self.reg[7] - 1) % 255
+                self.sp = self.reg[7]
+                value = self.reg[operand_a]
+                self.ram[self.sp] = value
+                self.pc += 2
+
+            elif op == 'POP':
+                self.sp = self.reg[7]
+                value = self.ram[self.sp]
+                self.reg[operand_a] = value
+                self.reg[7] = (self.sp + 1) % 255
+                self.pc += 2
 
             elif op == 'HLT':
 
