@@ -23,10 +23,10 @@ class CPU:
 
         # op_codes
         self.op_codes = {
-            'HLT': 0b00000001,
-            'LDI': 0b10000010,
-            'PRN': 0b01000111
-        }
+            0b00000001: 'HLT',
+            0b10000010: 'LDI',
+            0b01000111: 'PRN',
+            0b10100010: 'MUL'}
 
     def ram_read(self, MAR):
         return self.ram[MAR]
@@ -76,6 +76,11 @@ class CPU:
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         # elif op == "SUB": etc
+
+        # Add 'MUL' to ALU operations
+        elif op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
+
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -106,24 +111,31 @@ class CPU:
         operand_b = self.ram_read(self.pc + 2)
 
         while not halted:
-
+            self.trace()
             # Memory address from pc stored in IR variable
-            instruction = self.ram[self.pc]
+            self.ir = self.ram[self.pc]
+            op = self.op_codes[self.ir]
 
-            if instruction == 0b10000010:
+            if op == 'LDI':
 
                 self.reg[operand_a] = operand_b
                 self.pc += 3
 
-            elif instruction == 0b01000111:
+            elif op == 'PRN':
 
                 print(self.reg[operand_a])
                 self.pc += 2
 
-            elif instruction == 0b00000001:
+            elif op == 'MUL':
+                reg_a = self.ram[self.pc+1]
+                reg_b = self.ram[self.pc+2]
+                self.alu(op, reg_a, reg_b)
+                self.pc += 3
+
+            elif op == 'HLT':
 
                 halted = True
 
             else:
-                print(f"Unknown instruction at index {instruction}")
+                print(f"Unknown instruction at index {op}")
                 sys.exit(1)
