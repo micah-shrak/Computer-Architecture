@@ -20,6 +20,7 @@ class CPU:
         # Program counter, current index, pointer to currently executing instruction
         self.pc = 0
         self.fl = None  # FLAG
+        self.sp = 0
 
         # op_codes
         self.op_codes = {
@@ -107,15 +108,15 @@ class CPU:
     def run(self):
         """Run the CPU."""
         halted = False
-        operand_a = self.ram_read(self.pc + 1)
-        operand_b = self.ram_read(self.pc + 2)
 
         while not halted:
             self.trace()
+            operand_a = self.ram_read(self.pc + 1)
+            operand_b = self.ram_read(self.pc + 2)
             # Memory address from pc stored in IR variable
             self.ir = self.ram[self.pc]
             op = self.op_codes[self.ir]
-
+            #self.pc += 2
             if op == 'LDI':
 
                 self.reg[operand_a] = operand_b
@@ -127,8 +128,11 @@ class CPU:
                 self.pc += 2
 
             elif op == 'MUL':
-                reg_a = self.ram[self.pc+1]
-                reg_b = self.ram[self.pc+2]
+                reg_a = self.ram_read(self.pc+1)
+                print(f"reg_a: {reg_a}")
+                reg_b = self.ram_read(self.pc+2)
+                print(f"reg_b: {reg_b}")
+
                 self.alu(op, reg_a, reg_b)
                 self.pc += 3
 
